@@ -1,5 +1,6 @@
 package com.example.swiftchat
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,12 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,6 +28,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.swiftchat.ui.theme.SwiftChatTheme
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.text.KeyboardOptions
 
 class LoginActivity : ComponentActivity() {
@@ -40,19 +37,32 @@ class LoginActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SwiftChatTheme {
-                LoginScreen()
+                LoginScreen(
+                    navigateToChat = {
+                        startActivity(Intent(this, ChatPageActivity::class.java))
+                        finish()
+                    },
+                    navigateToSignUp = {
+                        startActivity(Intent(this, SignUpActivity::class.java))
+                    }
+                )
             }
         }
     }
 }
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(
+    navigateToChat: () -> Unit,
+    navigateToSignUp: () -> Unit
+) {
+    val context = LocalContext.current
+
     // Gradient background
     val gradientBrush = Brush.verticalGradient(
         colors = listOf(
-            Color(0xFF2196F3), // Light blue
-            Color(0xFF0D47A1)  // Deep blue
+            Color(0xFF2196F3),
+            Color(0xFF0D47A1)
         )
     )
 
@@ -76,8 +86,7 @@ fun LoginScreen() {
                 text = "Welcome Back!",
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
-                textAlign = TextAlign.Center
+                color = Color.White
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -85,8 +94,7 @@ fun LoginScreen() {
             Text(
                 text = "Sign in to continue chatting",
                 fontSize = 18.sp,
-                color = Color.White.copy(alpha = 0.9f),
-                textAlign = TextAlign.Center
+                color = Color.White.copy(alpha = 0.9f)
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -96,9 +104,7 @@ fun LoginScreen() {
                 value = email,
                 onValueChange = { email = it },
                 label = { Text("Email", color = Color.White) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.Transparent),
+                modifier = Modifier.fillMaxWidth(),
                 textStyle = TextStyle(color = Color.White),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
@@ -121,24 +127,27 @@ fun LoginScreen() {
                     keyboardType = KeyboardType.Password,
                     imeAction = ImeAction.Done
                 ),
-                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                visualTransformation = if (passwordVisible) VisualTransformation.None
+                else PasswordVisualTransformation(),
                 trailingIcon = {
-                    val icon = if (passwordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(imageVector = icon, contentDescription = null, tint = Color.White)
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Filled.VisibilityOff
+                            else Icons.Filled.Visibility,
+                            contentDescription = null,
+                            tint = Color.White
+                        )
                     }
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.Transparent),
+                modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Login button
+            // Login button → GO TO CHAT PAGE
             Button(
-                onClick = { /* TODO: hook up Firebase later */ },
+                onClick = { navigateToChat() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(55.dp),
@@ -155,11 +164,14 @@ fun LoginScreen() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Sign Up Navigation
             Text(
                 text = "Don't have an account? Sign Up",
                 fontSize = 16.sp,
                 color = Color.White,
-                modifier = Modifier.clickable { /* TODO: navigate to SignUp */ },
+                modifier = Modifier.clickable {
+                    navigateToSignUp()
+                },
                 textAlign = TextAlign.Center
             )
         }
